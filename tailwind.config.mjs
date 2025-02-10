@@ -71,6 +71,7 @@ export default {
       },
       fontFamily: {
         inter: ["Inter", "sans-serif"],
+        rm: ["Reddit Mono", "serif"]
       },
       borderRadius: {
         lg: "var(--radius)",

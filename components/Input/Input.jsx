@@ -1,113 +1,125 @@
 import React, { useState, useRef, useEffect } from "react";
+import 'remixicon/fonts/remixicon.css'
 
-const ModelDropdown = ({
-  selectedModel,
-  setSelectedModel,
-  models,
-  isOpen,
-  onToggle,
-  what,
-}) => {
+const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onToggle }) => {
   const dropdownRef = useRef(null);
-3
+  const [animate, setAnimate] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        onToggle(false);
+        startCloseAnimation();
       }
     };
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      setAnimate(true); // Trigger open animation
     }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onToggle]);
-
-  const handleModelSelect = (event, key) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setSelectedModel(key);
-    onToggle(false);
+  const startCloseAnimation = () => {
+    setAnimate(false);
+    setTimeout(() => onToggle(false), 300); // Match animation duration
   };
 
+  const handleModelSelect = (key) => {
+    setSelectedModel(key);
+    startCloseAnimation();
+  };
+
+  // Get selected model details safely
+  const selectedModelData = models[selectedModel] || {};
+  
   return (
     <div className="relative" ref={dropdownRef}>
+      {/* Trigger Button */}
       <button
-        type="button" // Add this to explicitly make it a button, not a submit
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onToggle(!isOpen);
-        }}
-        className="flex items-center space-x-1 sm:space-x-2 bg-[#212121] px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#383838] hover:bg-[#2a2a2a] transition-all"
+        onClick={() => onToggle(!isOpen)}
+        className="flex items-center gap-2 bg-[#212121] px-3 py-2 rounded-lg border border-[#383838] hover:border-[#414141] transition-colors"
       >
-        <span className="text-[#e2e2e2] text-xs sm:text-sm tracking-[0.05em] sm:tracking-[0.07em]">
-          <span className="text-[#e2e2e2ea] tracking-normal hidden sm:inline-block text-xs sm:text-sm">{what}: </span>
-          <span> {models[selectedModel]?.display || selectedModel}</span>
+        {selectedModelData.icon && (
+          <img 
+            src={selectedModelData.icon} 
+            className="w-5 h-5 object-contain"
+            alt="Model icon"
+            onError={(e) => e.target.style.display = 'none'} // Hide broken images
+          />
+        )}
+        <span className="text-[#16b616] font-inter text-sm">
+          {selectedModelData.display || selectedModel}
         </span>
-        <i
-          className={`ri-arrow-down-s-line text-[#8e8e8e] text-sm sm:text-base transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        ></i>
+        <i className={`ri-arrow-down-s-line text-[#8e8e8e] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
+
+      {/* Desktop Dropdown */}
       {isOpen && (
-        <div className="model-dropdown absolute right-0 bottom-full mb-1 sm:mb-2 w-40 sm:w-48 bg-[#212121] border border-[#383838] rounded-lg shadow-lg">
-          {Object.entries(models).map(([key, model], index, array) => (
+        <div className={`hidden sm:block absolute bottom-full mb-2 w-64 right-0 bg-[#212121] border border-[#383838] rounded-lg shadow-lg z-50 transition-opacity duration-300 ${animate ? "opacity-100" : "opacity-0"}`}>
+          {Object.entries(models).map(([key, model]) => (
             <button
               key={key}
-              type="button"
-              className={`block w-full text-left px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-[#e2e2e2] hover:bg-[#2a2a2a] tracking-[0.05em] sm:tracking-[0.07em] transition-all ease-out ${
-                index !== array.length - 1 ? 'border-b border-[#38383845]' : ''
-              }`}
-              onClick={(e) => handleModelSelect(e, key)}
+              onClick={() => handleModelSelect(key)}
+              className="flex items-center justify-between w-full px-3 py-2.5 hover:bg-[#2a2a2a] text-sm transition-colors"
             >
-              {key}
+              <div className="flex items-center gap-2">
+                {model.icon && <img src={model.icon} className="w-5 h-5 object-contain" alt="" />}
+                <div className="text-left">
+                  <div className="text-[#e2e2e2]">{model.display}</div>
+                  <div className="text-[#8e8e8e] text-xs mt-0.5">{model.description}</div>
+                </div>
+              </div>
+              {selectedModel === key && <i className="ri-check-line text-[#24ce24]" />}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Mobile Dropdown */}
+      {isOpen && (
+        <div className={`sm:hidden fixed bottom-0 left-0 right-0 bg-[#212121] border-t border-[#383838] rounded-t-lg z-50 transform transition-transform duration-300 ${animate ? "translate-y-0" : "translate-y-full"}`}>
+          <div className="p-2">
+            <div className="flex justify-end mb-1">
+              <button 
+                onClick={startCloseAnimation}
+                className="p-1 text-[#8e8e8e] hover:text-[#e2e2e2] transition-colors"
+              >
+                <i className="ri-close-line text-lg" />
+              </button>
+            </div>
+            <div className="max-h-[50vh] overflow-y-auto">
+              {Object.entries(models).map(([key, model]) => (
+                <button
+                  key={key}
+                  onClick={() => handleModelSelect(key)}
+                  className="flex items-center justify-between w-full px-3 py-2.5 hover:bg-[#2a2a2a] rounded-lg transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    {model.icon && <img src={model.icon} className="w-5 h-5 object-contain" alt="" />}
+                    <div className="text-left">
+                      <div className="text-[#e2e2e2] text-sm">{model.display}</div>
+                      <div className="text-[#8e8e8e] text-xs mt-0.5">{model.description}</div>
+                    </div>
+                  </div>
+                  {selectedModel === key && <i className="ri-check-line text-[#24ce24]" />}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-const Input = ({
-  handleSendMessage,
-  selectedModel,
-  selectedProvider,
-  setSelectedModel,
-  setSelectedProvider,
-  models,
-  isGenerating,
-  isWebActive,
-  handleSetWebActive,
-}) => {
+const Input = ({ handleSendMessage, selectedModel, setSelectedModel, models, isGenerating }) => {
   const [message, setMessage] = useState("");
   const [openDropdown, setOpenDropdown] = useState(null);
   const textareaRef = useRef(null);
-  const formRef = useRef(null);
 
   const handleMessageChange = (e) => {
     setMessage(e.target.value);
     adjustTextareaHeight();
-  };
-
-  useEffect(() => {
-    const providers = models[selectedModel]?.providers;
-    if (providers) {
-      const firstProviderKey = Object.keys(providers)[0];
-      setSelectedProvider(firstProviderKey);
-    }
-  }, [selectedModel]);
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
   };
 
   const adjustTextareaHeight = () => {
@@ -120,93 +132,51 @@ const Input = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim() && !isGenerating) {
-      handleSendMessage(message, selectedModel, selectedProvider);
+      handleSendMessage(message, selectedModel);
       setMessage("");
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
     }
-  };
-
-  const handleDropdownToggle = (dropdownName) => (isOpen) => {
-    setOpenDropdown(isOpen ? dropdownName : null);
   };
 
   useEffect(() => {
     adjustTextareaHeight();
-    // Focus the textarea after component mounts
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+    textareaRef.current?.focus();
   }, [message]);
 
   return (
-    <div className="w-full px-4 pb-4 shadow-lg bg-gradient-to-t from-[#121212] to-transparent">
-      <div className="max-w-4xl mx-auto relative">
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="relative flex flex-col bg-[#212121] rounded-xl shadow-lg border border-[#383838]"
-        >
-          <div className="flex items-end">
+    <div className="w-full">
+      <div className="max-w-[43rem] mx-auto">
+        <form onSubmit={handleSubmit} className="bg-[#1f201f] rounded-xl border border-[#383838] shadow-lg">
+          <div className="sm:px-4 sm:py-4 px-4 pt-3">
             <textarea
               ref={textareaRef}
-              className="w-full resize-none bg-transparent pl-4 pr-1 sm:text-base text-sm py-4 min-h-[56px] max-h-[200px]
-                  text-[#e2e2e2] placeholder-[#8e8e8e] focus:outline-none 
-                  scrollbar-thin scrollbar-thumb-[#383838] scrollbar-track-transparent
-                  overflow-y-auto"
-              placeholder="Message Zenos AI..."
+              className="w-full resize-none bg-transparent text-[#c9c9c9] placeholder-[#989898] focus:outline-none
+                scrollbar-thin scrollbar-thumb-[#383838] scrollbar-track-transparent pr-12"
+              placeholder="Message YourMom..."
               rows={1}
               value={message}
               onChange={handleMessageChange}
-              onKeyDown={handleKeyDown}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSubmit(e)}
             />
+          </div>
+          
+          <div className="flex justify-between items-center px-4 py-3">
+            <ModelDropdown
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+              models={models}
+              isOpen={openDropdown === "model"}
+              onToggle={(isOpen) => setOpenDropdown(isOpen ? "model" : null)}
+            />
+            
             <button
               type="submit"
-              className="sm:min-w-8 sm:min-h-8 min-w-8 min-h-8 flex items-center justify-center rounded-full my-auto mr-2 
-                bg-[#dddddd] hover:bg-gray-100 transition-colors duration-200 ease-in-out 
-                disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-[#213420] opacity-60 hover:bg-[#243823] 
+                transition-all duration-200 hover:shadow-lg disabled:opacity-30 disabled:cursor-not-allowed"
               disabled={!message.trim() || isGenerating}
             >
-              <i className="ri-arrow-up-line text-xl text-[#000000]"></i>
+              <i className="ri-arrow-right-line text-2xl text-[#24ce24]"></i>
             </button>
-          </div>
-
-          <div className="flex items-center px-4 py-2 border-t border-[#383838] sm:space-x-8 space-x-4">
-            <div className="flex items-center sm:space-x-4 space-x-4 z-10">
-              <button
-                type="button"
-                onClick={() => handleSetWebActive()}
-                className="text-[#8e8e8e] transition-all duration-200"
-              >
-                <i className={`ri-attachment-2 text-[1.4rem]`}></i>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSetWebActive()}
-                className="text-[#8e8e8e] transition-all duration-200"
-              >
-                <i className={`ri-global-line ${isWebActive ? "text-blue-500" : ""} transition-all ease-in-out text-[1.4rem]`}></i>
-              </button>
-            </div>
-            <div className="flex items-center sm:space-x-4 space-x-2">
-              <ModelDropdown
-                selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
-                models={models}
-                isOpen={openDropdown === "model"}
-                what="Model"
-                onToggle={handleDropdownToggle("model")}
-              />
-              <ModelDropdown
-                selectedModel={selectedProvider}
-                setSelectedModel={setSelectedProvider}
-                models={models[selectedModel]?.providers || {}}
-                isOpen={openDropdown === "provider"}
-                what="Provider"
-                onToggle={handleDropdownToggle("provider")}
-              />
-            </div>
           </div>
         </form>
       </div>
