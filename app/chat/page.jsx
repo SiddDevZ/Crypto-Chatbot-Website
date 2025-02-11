@@ -8,21 +8,25 @@ import Input from "../../components/Input/Input";
 const fakeChats = [
   {
     id: 1,
-    text: "Hey there! I'm YourMomGPT, your Web3 AI assistant. How can I help you today?",
-    isBot: true,
-    timestamp: "2:45 PM",
+    userMessage: {
+      text: "Can you show me the latest ETH price analysis?",
+      timestamp: "2:46 PM",
+    },
+    botResponse: {
+      text: "Sure! Ethereum is currently trading at $3,400 with a 24h volume of $12B. The RSI indicates...",
+      timestamp: "2:46 PM",
+    },
   },
   {
     id: 2,
-    text: "Can you show me the latest ETH price analysis?",
-    isBot: false,
-    timestamp: "2:46 PM",
-  },
-  {
-    id: 3,
-    text: "Sure! Ethereum is currently trading at $3,400 with a 24h volume of $12B. The RSI indicates...",
-    isBot: true,
-    timestamp: "2:46 PM",
+    userMessage: {
+      text: "What is the current BTC price?",
+      timestamp: "2:50 PM",
+    },
+    botResponse: {
+      text: "Bitcoin is currently trading at $45,000 with a 24h volume of $30B.",
+      timestamp: "2:51 PM",
+    },
   },
 ];
 const Home = () => {
@@ -188,11 +192,33 @@ const Home = () => {
           </div>
         ) : (
           /* Add your chat interface here */
-          <div className="min-h-screen w-[94%] mx-auto flex flex-col">
+          <div className="min-h-screen w-[94%] max-w-3xl mx-auto flex flex-col">
             <div className="flex-1 overflow-y-auto mt-[15vh] p-4">
-              <div className=" max-w-4xl bg-red-500 mx-auto h-10">
+              {/* <div className=" max-w-4xl bg-red-500 mx-auto h-10">
 
-              </div>
+              </div> */}
+              {fakeChats.map((chat, index) => (
+                <div
+                  key={index}
+                  className={`chat-entry mb-4 pb-8 ${index !== fakeChats.length - 1 ? 'border-[#333333] border-b' : ''}`}
+                >
+                  <div className="text-[#f8f8f8] p-3 rounded-lg mb-2">
+                    <span className="font-semibold text-2xl">{chat.userMessage.text}</span>
+                  </div>
+                  <div className="w-full px-5 py-5 border border-[#292929] rounded-2xl">
+                    <h2>Workflow</h2>
+                  </div>
+                  <div className="font-medium text-[#434343] p-3 rounded-lg mb-2">
+                    <span>{chat.botResponse.text}</span>
+                  </div>
+                  {/* <div className="w-full mt-5">
+                    <div className="flex w-auto px-2 border rounded-xl space-x-2">
+                      <img src="/bulb.svg" alt="" />
+                      <h2>Web3 Chatbot</h2>
+                    </div>
+                  </div> */}
+                </div>
+              ))}
             </div>
             <div className="pb-4 px-3 flex-shrink-0 fixed bottom-0 left-0 right-0 md:relative">
               <Input
