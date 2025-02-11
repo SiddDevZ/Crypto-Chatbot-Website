@@ -53,7 +53,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    document.body.style.overflow = sidebarState === "opening" ? "hidden" : "";
+    if (typeof window !== "undefined") {
+      document.body.style.overflow = sidebarState === "opening" ? "hidden" : "";
+    }
   }, [sidebarState]);
 
   return (
@@ -200,10 +202,16 @@ const Home = () => {
               {fakeChats.map((chat, index) => (
                 <div
                   key={index}
-                  className={`chat-entry mb-4 pb-8 ${index !== fakeChats.length - 1 ? 'border-[#333333] border-b' : ''}`}
+                  className={`chat-entry mb-4 pb-8 ${
+                    index !== fakeChats.length - 1
+                      ? "border-[#333333] border-b"
+                      : ""
+                  }`}
                 >
                   <div className="text-[#f8f8f8] p-3 rounded-lg mb-2">
-                    <span className="font-semibold text-2xl">{chat.userMessage.text}</span>
+                    <span className="font-semibold text-2xl">
+                      {chat.userMessage.text}
+                    </span>
                   </div>
                   <div className="w-full px-5 py-5 border border-[#292929] rounded-2xl">
                     <h2>Workflow</h2>
