@@ -145,7 +145,7 @@ const Input = ({ handleSendMessage, selectedModel, setSelectedModel, models, isG
 
   return (
     <div className="w-full">
-      <div className="max-w-[43rem] mx-auto">
+      <div className="max-w-[46rem] mx-auto">
         <form onSubmit={handleSubmit} className="bg-[#1f201f] rounded-xl border border-[#383838] shadow-lg">
           <div className="sm:px-4 sm:py-4 px-4 pt-3">
             <textarea

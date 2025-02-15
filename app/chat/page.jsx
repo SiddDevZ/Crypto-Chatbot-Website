@@ -1,11 +1,121 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { RiMenuLine, RiCloseLine } from "react-icons/ri";
 import CryptoCoins from "@/components/CryptoCoins/CryptoCoins";
 import { aiQuickAccess, coins, aiCoins } from "./data.js";
 import models from "./models.js";
 import Input from "../../components/Input/Input";
+import { RiArrowDownSLine } from 'react-icons/ri';
+
+const WorkflowSection = ({ show = false, thinking = true, generating = false }) => {
+  const [isExpanded, setIsExpanded] = useState(show);
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, [isExpanded]);
+
+  useEffect(() => {
+    setIsExpanded(show);
+  }, [show]);
+
+  const LoadingIcon = () => (
+    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
+
+  const CheckmarkIcon = () => (
+    <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  );
+
+  return (
+    <div onClick={() => setIsExpanded(!isExpanded)} className="w-full cursor-pointer px-5 py-4 border unselectable border-[#292929] rounded-2xl text-[#E0E0E0]">
+      <div className="flex justify-between items-center cursor-pointer">
+        <div className="flex items-center space-x-2">
+          <h2 className="font-semibold">Workflow</h2>
+        </div>
+        <RiArrowDownSLine 
+          className={`text-xl transition-transform duration-300 ${isExpanded ? 'transform rotate-180' : ''}`} 
+        />
+      </div>
+      <div 
+        ref={contentRef}
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ maxHeight: isExpanded ? `${contentHeight}px` : '0px' }}
+      >
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center space-x-2">
+            <div className="w-5 h-5 rounded-full bg-[#1C1C1C] flex items-center justify-center">
+              {thinking ? <CheckmarkIcon /> : <LoadingIcon />}
+            </div>
+            <span>Thinking</span>
+          </div>
+          {thinking && (
+            <div className="flex items-center space-x-2">
+              <div className="w-5 h-5 rounded-full bg-[#1C1C1C] flex items-center justify-center">
+                {generating ? <CheckmarkIcon /> : <LoadingIcon />}
+              </div>
+              <span>Generating</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const fakeChats = [
+  {
+    id: 1,
+    userMessage: {
+      text: "Can you show me the latest ETH price analysis?",
+      timestamp: "2:46 PM",
+    },
+    botResponse: {
+      text: "Sure! Ethereum is currently trading at $3,400 with a 24h volume of $12B. The RSI indicates...",
+      timestamp: "2:46 PM",
+    },
+  },
+  {
+    id: 2,
+    userMessage: {
+      text: "What is the current BTC price?",
+      timestamp: "2:50 PM",
+    },
+    botResponse: {
+      text: "Bitcoin is currently trading at $45,000 with a 24h volume of $30B.",
+      timestamp: "2:51 PM",
+    },
+  },
+  {
+    id: 1,
+    userMessage: {
+      text: "Can you show me the latest ETH price analysis?",
+      timestamp: "2:46 PM",
+    },
+    botResponse: {
+      text: "Sure! Ethereum is currently trading at $3,400 with a 24h volume of $12B. The RSI indicates...",
+      timestamp: "2:46 PM",
+    },
+  },
+  {
+    id: 2,
+    userMessage: {
+      text: "What is the current BTC price?",
+      timestamp: "2:50 PM",
+    },
+    botResponse: {
+      text: "Bitcoin is currently trading at $45,000 with a 24h volume of $30B.",
+      timestamp: "2:51 PM",
+    },
+  },
   {
     id: 1,
     userMessage: {
@@ -194,48 +304,68 @@ const Home = () => {
           </div>
         ) : (
           /* Add your chat interface here */
-          <div className="min-h-screen w-[94%] max-w-3xl mx-auto flex flex-col">
-            <div className="flex-1 overflow-y-auto mt-[15vh] p-4">
-              {/* <div className=" max-w-4xl bg-red-500 mx-auto h-10">
-
-              </div> */}
-              {fakeChats.map((chat, index) => (
-                <div
-                  key={index}
-                  className={`chat-entry mb-4 pb-8 ${
-                    index !== fakeChats.length - 1
-                      ? "border-[#333333] border-b"
-                      : ""
-                  }`}
-                >
-                  <div className="text-[#f8f8f8] p-3 rounded-lg mb-2">
-                    <span className="font-semibold text-2xl">
-                      {chat.userMessage.text}
-                    </span>
-                  </div>
-                  <div className="w-full px-5 py-5 border border-[#292929] rounded-2xl">
-                    <h2>Workflow</h2>
-                  </div>
-                  <div className="font-medium text-[#434343] p-3 rounded-lg mb-2">
-                    <span>{chat.botResponse.text}</span>
-                  </div>
-                  {/* <div className="w-full mt-5">
-                    <div className="flex w-auto px-2 border rounded-xl space-x-2">
-                      <img src="/bulb.svg" alt="" />
-                      <h2>Web3 Chatbot</h2>
+          <div className="flex flex-col h-screen relative">
+            <div className="flex-1 overflow-y-auto pb-24">
+              <div className="w-[94%] max-w-3xl mx-auto mt-[15vh] p-4">
+                {fakeChats.map((chat, index) => (
+                  <div
+                    key={index}
+                    className={`chat-entry mb-4 pb-8 ${
+                      index !== fakeChats.length - 1
+                        ? "border-[#333333] border-b"
+                        : ""
+                    }`}
+                  >
+                    <div className="text-[#f8f8f8] p-3 rounded-lg mb-2">
+                      <span className="font-semibold text-lg flex items-center">
+                        <i className="ri-user-3-fill w-7 h-7 rounded-full bg-[#1f201f] text-[#13398a] flex items-center justify-center mr-2"></i>
+                        {chat.userMessage.text}
+                      </span>
                     </div>
-                  </div> */}
-                </div>
-              ))}
+                    <WorkflowSection />
+                    <div className="font-medium text-[#434343] p-3 rounded-lg mb-2">
+                      <span>{chat.botResponse.text}</span>
+                    </div>
+                    <div className="w-full mt-5 flex justify-between items-center">
+                      <div className="inline-flex unselectable items-center max-w-max px-2 py-2 border border-[#343434] rounded-xl space-x-2">
+                        <img src="/bulb.svg" alt="" className="w-5 h-5" />
+                        <h2 className="text-sm">Web3 Chatbot</h2>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={() => {/* Add copy functionality */}}
+                          className="transition-all ease-in-out hover:scale-105"
+                        >
+                          <i className="text-[#7e7e7e] hover:text-[#a4a4a4] transition-all ease-in-out ri-file-copy-line"></i>
+                        </button>
+                        <button
+                          onClick={() => {/* Add like functionality */}}
+                          className="transition-all ease-in-out hover:scale-105"
+                        >
+                          <i className="text-[#7e7e7e] hover:text-[#a4a4a4] transition-all ease-in-out ri-thumb-up-line"></i>
+                        </button>
+                        <button
+                          onClick={() => {/* Add dislike functionality */}}
+                          className="transition-all ease-in-out hover:scale-105"
+                        >
+                          <i className="text-[#7e7e7e] hover:text-[#a4a4a4] transition-all ease-in-out ri-thumb-down-line"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="pb-4 px-3 flex-shrink-0 fixed bottom-0 left-0 right-0 md:relative">
-              <Input
-                isGenerating={isGenerating}
-                handleSendMessage={handleSendMessage}
-                selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
-                models={models}
-              />
+            <div className="absolute bottom-0 left-0 right-0 pb-4 px-3 pt-0.5 bg-[#131414]">
+              <div className="max-w-3xl mx-auto">
+                <Input
+                  isGenerating={isGenerating}
+                  handleSendMessage={handleSendMessage}
+                  selectedModel={selectedModel}
+                  setSelectedModel={setSelectedModel}
+                  models={models}
+                />
+              </div>
             </div>
           </div>
         )}
