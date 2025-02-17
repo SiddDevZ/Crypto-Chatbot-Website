@@ -2,29 +2,36 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
 import { serve } from "@hono/node-server";
-import mongoose from "mongoose";
 import { config } from "dotenv";
+import { ChatBot } from "./routes/response.js"; // Import the ChatBot class
 
 config();
 
-import { ChatBot } from "./routes/response.js";
-import { ImageBot } from "./routes/image.js";
-import googleLoginRoute from "./routes/googleLogin.js";
-import verifyRoute from "./routes/verify.js";
-import discordLoginRoute from "./routes/discordLogin.js";
-import registerRoute from "./routes/register.js";
-import loginRoute from "./routes/login.js";
-import chatRoute from "./routes/chat.js";
-import messageRoute from "./routes/message.js";
-import fetchChatsRoute from "./routes/fetchChats.js";
-import fetchChatRoute from "./routes/fetchChat.js";
+// Rate limiting mechanism
+const RATE_LIMIT_WINDOW = 60000; // 1 minute in milliseconds
+const MAX_REQUESTS_PER_WINDOW = 5; // Maximum 5 requests per minute
+
+const rateLimitMap = new Map();
+
+function isRateLimited(socketId) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW;
+  
+  if (!rateLimitMap.has(socketId)) {
+    rateLimitMap.set(socketId, [now]);
+    return false;
+  }
+
+  const requests = rateLimitMap.get(socketId).filter(time => time > windowStart);
+  requests.push(now);
+  rateLimitMap.set(socketId, requests);
+
+  return requests.length > MAX_REQUESTS_PER_WINDOW;
+}
 
 const app = new Hono();
 
 app.use("*", cors());
-
-const dbUrl = process.env.DATABASE_URL;
-mongoose.connect(dbUrl);
 
 const port = process.env.PORT || 3001;
 
@@ -40,97 +47,37 @@ const io = new Server(server, {
   },
 });
 
-// Set up routes, passing io to the ones that need it
 app.get("/", (c) => c.text("Hello World!"));
-// app.route('/api/response', responseRoute)
-app.route("/api/googleauth", googleLoginRoute);
-app.route("/api/verify", verifyRoute);
-app.route("/api/discordauth", discordLoginRoute);
-app.route("/api/register", registerRoute);
-app.route("/api/login", loginRoute);
-app.route("/api/chat", chatRoute(io)); // Pass io to chatRoute
-app.route("/api/message", messageRoute);
-app.route("/api/fetchchats", fetchChatsRoute);
-app.route("/api/fetchchat", fetchChatRoute);
 
-const chatbot = new ChatBot();
-const imagebot = new ImageBot();
-const conversationHistories = new Map();
+// Initialize ChatBot with API key
+const chatBot = new ChatBot(process.env.API_KEY);
 
 io.on("connection", (socket) => {
   console.log("A user connected");
 
-  socket.on("message", async ({ message, model, provider, chatId }) => {
-    // console.log(provider)
-    // console.log(conversationHistories)
-    // console.log(message)
-    // console.log(chatId)
-    if (!chatId) {
-      socket.emit("error", "Chat ID is required");
+  socket.on("send", async ({ prompt }) => {
+    console.log("Received prompt:", prompt);
+
+    if (isRateLimited(socket.id)) {
+      console.log("Rate limit exceeded for socket:", socket.id);
+      socket.emit("error", "Rate limit exceeded. Please wait before sending more requests.");
+      socket.emit("done");
       return;
     }
 
-    let history;
-    if (!conversationHistories.has(chatId)) {
-      socket.emit("requestHistory", chatId);
-
-      history = await new Promise((resolve) => {
-        socket.once("provideHistory", (data) => {
-          if (data && Array.isArray(data.history)) {
-            resolve(data.history);
-          } else {
-            resolve([]);
-          }
-        });
-
-        setTimeout(() => {
-          resolve([]);
-        }, 5000);
-      });
-
-      conversationHistories.set(chatId, history);
-    } else {
-      history = conversationHistories.get(chatId);
-    }
-
     try {
-      history.push({ role: "user", content: message });
-
-      let fullResponse;
-      const imageModels = ["flux", "flux-pro", "midjourney", "flux-dev"];
-      if (imageModels.includes(model)) {
-
-        fullResponse = await imagebot.generateImage(
-          socket,
-          message,
-          model,
-          provider
-        );
-      } else {
-
-        fullResponse = await chatbot.getResponse(
-          socket,
-          model,
-          provider,
-          history
-        );
-      }
-      if (fullResponse == undefined) {
-        fullResponse =
-          "Error: failed to generate response. Try with another model or provider.";
-      }
-      history.push({ role: "assistant", content: fullResponse });
-      // console.log(fullResponse)
-
-      conversationHistories.set(chatId, history);
+      await chatBot.handleChatStream(socket, prompt);
     } catch (error) {
-      console.error("Error processing message:", error);
-      socket.emit("error", error.message);
+      console.error("Error handling chat stream:", error);
+      socket.emit("error", "Failed to process your request");
+      socket.emit("done");
     }
   });
 
+  // Handle client disconnects
   socket.on("disconnect", () => {
     console.log("User disconnected");
+    rateLimitMap.delete(socket.id); // Clean up rate limit data for disconnected users
   });
 });
 

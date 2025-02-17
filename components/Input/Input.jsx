@@ -5,6 +5,12 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
   const dropdownRef = useRef(null);
   const [animate, setAnimate] = useState(false);
 
+  // Convert models object to array for index-based access
+  const modelEntries = Object.values(models);
+  
+  // Get selected model details using index
+  const selectedModelData = modelEntries[selectedModel] || {};
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -14,24 +20,21 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      setAnimate(true); // Trigger open animation
+      setAnimate(true);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
   const startCloseAnimation = () => {
     setAnimate(false);
-    setTimeout(() => onToggle(false), 300); // Match animation duration
+    setTimeout(() => onToggle(false), 300);
   };
 
-  const handleModelSelect = (key) => {
-    setSelectedModel(key);
+  const handleModelSelect = (index) => {
+    setSelectedModel(index);
     startCloseAnimation();
   };
 
-  // Get selected model details safely
-  const selectedModelData = models[selectedModel] || {};
-  
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Trigger Button */}
@@ -44,11 +47,11 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
             src={selectedModelData.icon} 
             className="w-5 h-5 object-contain"
             alt="Model icon"
-            onError={(e) => e.target.style.display = 'none'} // Hide broken images
+            onError={(e) => e.target.style.display = 'none'}
           />
         )}
         <span className="text-[#16b616] font-inter text-sm">
-          {selectedModelData.display || selectedModel}
+          {selectedModelData.display}
         </span>
         <i className={`ri-arrow-down-s-line text-[#8e8e8e] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
@@ -56,10 +59,10 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
       {/* Desktop Dropdown */}
       {isOpen && (
         <div className={`hidden sm:block absolute bottom-full mb-2 w-64 right-0 bg-[#212121] border border-[#383838] rounded-lg shadow-lg z-50 transition-opacity duration-300 ${animate ? "opacity-100" : "opacity-0"}`}>
-          {Object.entries(models).map(([key, model]) => (
+          {modelEntries.map((model, index) => (
             <button
-              key={key}
-              onClick={() => handleModelSelect(key)}
+              key={model.value}
+              onClick={() => handleModelSelect(index)}
               className="flex items-center justify-between w-full px-3 py-2.5 hover:bg-[#2a2a2a] text-sm transition-colors"
             >
               <div className="flex items-center gap-2">
@@ -69,7 +72,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
                   <div className="text-[#8e8e8e] text-xs mt-0.5">{model.description}</div>
                 </div>
               </div>
-              {selectedModel === key && <i className="ri-check-line text-[#24ce24]" />}
+              {selectedModel === index && <i className="ri-check-line text-[#24ce24]" />}
             </button>
           ))}
         </div>
@@ -88,10 +91,10 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
               </button>
             </div>
             <div className="max-h-[50vh] overflow-y-auto">
-              {Object.entries(models).map(([key, model]) => (
+              {modelEntries.map((model, index) => (
                 <button
-                  key={key}
-                  onClick={() => handleModelSelect(key)}
+                  key={model.value}
+                  onClick={() => handleModelSelect(index)}
                   className="flex items-center justify-between w-full px-3 py-2.5 hover:bg-[#2a2a2a] rounded-lg transition-colors"
                 >
                   <div className="flex items-center gap-2">
@@ -101,7 +104,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
                       <div className="text-[#8e8e8e] text-xs mt-0.5">{model.description}</div>
                     </div>
                   </div>
-                  {selectedModel === key && <i className="ri-check-line text-[#24ce24]" />}
+                  {selectedModel === index && <i className="ri-check-line text-[#24ce24]" />}
                 </button>
               ))}
             </div>
@@ -111,6 +114,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
     </div>
   );
 };
+
 
 const Input = ({ handleSendMessage, selectedModel, setSelectedModel, models, isGenerating }) => {
   const [message, setMessage] = useState("");

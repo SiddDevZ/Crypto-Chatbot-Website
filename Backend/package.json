@@ -5,6 +5,7 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "@chaingpt/generalchat": "^0.0.10",
     "@hono/node-server": "^1.13.7",
     "dotenv": "^16.4.7",
     "eventsource": "^3.0.2",

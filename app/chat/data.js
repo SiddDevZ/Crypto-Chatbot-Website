@@ -25,35 +25,35 @@ export const aiQuickAccess = [
   },
 ];
 
-export const coins = [
+export const coinss = [
   {
     name: "Bitcoin",
     symbol: "BTC",
-    priceChange: "+2.50%",
+    priceChange: "+0.1%",
     logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
   },
   {
     name: "Ethereum",
     symbol: "ETH",
-    priceChange: "-1.20%",
+    priceChange: "-0.1%",
     logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
   },
   {
     name: "Litecoin",
     symbol: "LTC",
-    priceChange: "+0.75%",
+    priceChange: "+0.1%",
     logo: "https://cryptologos.cc/logos/litecoin-ltc-logo.png",
   },
   {
     name: "Solana",
     symbol: "SOL",
-    priceChange: "+3.10%",
+    priceChange: "-0.1%",
     logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
   },
   {
     name: "Terra",
     symbol: "LUNA",
-    priceChange: "-4.00%",
+    priceChange: "+0.1%",
     logo: "https://cryptologos.cc/logos/terra-luna-luna-logo.png",
   },
 //   {
@@ -70,35 +70,35 @@ export const coins = [
   // },
 ];
 
-export const aiCoins = [
+export const aiCoinss = [
   {
     name: "Bittensor",
     symbol: "TAO",
-    priceChange: "+18.90%",
+    priceChange: "+0.1%",
     logo: "https://cryptologos.cc/logos/bittensor-tao-logo.png", // Decentralized ML network [1][4]
   },
   {
     name: "SingularityNET",
     symbol: "AGIX",
-    priceChange: "+9.80%",
+    priceChange: "-0.1%",
     logo: "https://cryptologos.cc/logos/singularitynet-agix-logo.png", // AI marketplace [1][5]
   },
   {
     name: "Injective",
     symbol: "INJ",
-    priceChange: "+4.20%",
+    priceChange: "+0.1%",
     logo: "https://cryptologos.cc/logos/injective-protocol-inj-logo.png", // AI-powered DeFi [1][4]
   },
   {
     name: "The Graph",
     symbol: "GRT",
-    priceChange: "+6.50%",
+    priceChange: "-0.1%",
     logo: "https://cryptologos.cc/logos/the-graph-grt-logo.png", // Blockchain data indexing [1][2][11]
   },
   {
     name: "Numeraire",
     symbol: "NMR",
-    priceChange: "+3.90%",
+    priceChange: "+0.1%",
     logo: "https://cryptologos.cc/logos/numeraire-nmr-logo.png", // Hedge fund AI [4][5][7]
   },
 //   {

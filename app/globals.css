@@ -172,7 +172,21 @@
 .animate-h4 {
   animation-delay: 0.6s;
 }
+@keyframes cursor-blink {
+  0% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.1;
+  }
+}
 
+.animate-cursor-blink {
+  animation: cursor-blink 1s infinite;
+}
 .animate-buttons {
   animation-delay: 1.1s;
 }
@@ -265,4 +279,178 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+
+.zenos-markdown-content {
+  all: initial;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  color: #e2e2e2;
+  line-height: 1.625; 
+}
+
+@media (min-width: 768px) {
+  .zenos-markdown-content {
+    font-size: 1rem;
+  }
+}
+
+.zenos-markdown-content * {
+  all: revert;
+}
+
+.zenos-markdown-content > *:first-child {
+  margin-top: 1px !important;
+}
+
+.zenos-markdown-content > *:last-child {
+  margin-bottom: 1px !important;
+}
+
+.zenos-markdown-content h1,
+.zenos-markdown-content h2,
+.zenos-markdown-content h3,
+.zenos-markdown-content h4,
+.zenos-markdown-content h5,
+.zenos-markdown-content h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* ... rest of the CSS remains unchanged ... */
+
+.zenos-markdown-content h1 { font-size: 2em; }
+.zenos-markdown-content h2 { font-size: 1.5em; }
+.zenos-markdown-content h3 { font-size: 1.45em; }
+.zenos-markdown-content h4 { font-size: 1em; }
+.zenos-markdown-content h5 { font-size: 0.75em; }
+.zenos-markdown-content h6 { font-size: 0.85em; }
+
+.zenos-markdown-content ul,
+.zenos-markdown-content ol {
+  padding-left: 2em;
+  margin-bottom: 16px;
+}
+
+.zenos-markdown-content ul { list-style-type: disc; }
+.zenos-markdown-content ol { list-style-type: decimal; }
+
+.zenos-markdown-content li {
+  margin-bottom: 0.25em;
+}
+
+.zenos-markdown-content li > ul,
+.zenos-markdown-content li > ol {
+  margin-top: 0.25em;
+  margin-bottom: 0;
+}
+
+.zenos-markdown-content p {
+  margin-bottom: 16px;
+}
+
+.zenos-markdown-content a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.zenos-markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.zenos-markdown-content code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(19, 21, 24, 0.05);
+  border-radius: 3px;
+  font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.zenos-markdown-content pre {
+  padding: 2px;
+  overflow: auto;
+  border-radius: 3px;
+}
+
+.zenos-markdown-content pre code {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.zenos-markdown-content blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  margin-bottom: 16px;
+}
+
+.zenos-markdown-content table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.zenos-markdown-content table th,
+.zenos-markdown-content table td {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+
+.code-block {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #3a3a3a7e;
+  margin-bottom: 1rem;
+}
+
+.code-header {
+  background-color: #2a2a2a;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-language {
+  display: flex;
+  align-items: center;
+}
+
+.code-language i {
+  color: #c69326;
+  margin-right: 0.5rem;
+}
+
+.code-language span {
+  color: #e2e2e2;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.copy-button {
+  color: #8e8e8e;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  color: #e2e2e2;
+}
+
+.copy-button i {
+  margin-right: 0.25rem;
 }

@@ -1,79 +1,58 @@
 import { Hono } from 'hono'
 import { rateLimiter } from "hono-rate-limiter"
-import fetch from 'node-fetch'
+import { GeneralChat } from '@chaingpt/generalchat'
 
 const router = new Hono()
 
 const limiter = rateLimiter({
-  windowMs: 10 * 60 * 1000,  // 10 minutes in milliseconds
-  limit: 150,                // 150 requests per 10 minutes
+  windowMs: 10 * 60 * 1000,
+  limit: 150, 
   standardHeaders: "draft-6",
   keyGenerator: (c) => c.req.header('x-forwarded-for') || c.req.ip,
 })
 
 export class ChatBot {
-    constructor() {
-        // this.conversationHistories = new Map();
-        this.defaultModel = "gpt-4o";
-        this.providers = ['Blackbox', 'DarkAI', 'PollinationsAI'];
+    constructor(apiKey) {
+        this.generalchat = new GeneralChat({
+            apiKey: apiKey
+        });
     }
 
-    async getResponse(socket, model, provider, history) {
-        const selectedModel = model || this.defaultModel;
-        const selectedProviders = provider && provider.length > 0 ? provider : this.providers;
-    
-        console.log(selectedModel);
-        console.log(selectedProviders);
-    
-        let fullResponse = "";
-    
-        const providerPromises = selectedProviders.map(async (provider) => {
-            try {
-                const response = await fetch('https://chat-api-rp7a.onrender.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: selectedModel,
-                        messages: history,
-                        provider: provider,
-                        stream: false
-                    })
-                });
-    
-                if (!response.ok) return null;
-    
-                const data = await response.json();
-                return data.choices[0]?.message?.content || null;
-            } catch (error) {
-                console.error(`Error with ${provider}:`, error);
-                return null;
-            }
-        });
-    
-        const results = await Promise.all(providerPromises);
-        
-        for (let i = 0; i < results.length; i++) {
-            if (results[i]) {
-                fullResponse = results[i];
-                socket.emit('prov', selectedProviders[i]);
-                break;
-            }
+    async handleChatStream(socket, question) {
+        try {
+            const stream = await this.generalchat.createChatStream({
+                question,
+                chatHistory: "off"
+            });
+
+            let buffer = '';
+            stream.on('data', (chunk) => {
+                buffer += chunk.toString();
+                
+                const sentences = buffer.split(/(?<=[\n.!?])/g);
+                
+                if (sentences.length > 1) {
+                    const complete = sentences.slice(0, -1).join('');
+                    buffer = sentences[sentences.length - 1];
+                    socket.emit('chunk', complete);
+                }
+            });
+
+            stream.on('end', () => {
+                socket.emit('done');
+            });
+
+            // Handle stream errors
+            stream.on('error', (error) => {
+                console.error('Stream error:', error);
+                socket.emit('error', 'Stream processing failed');
+            });
+
+        } catch (error) {
+            console.error("Error creating chat stream:", error);
+            socket.emit('error', 'Failed to create chat stream');
+            throw error;
         }
-    
-        console.log("fullResponse: ", fullResponse);
-        
-        if (fullResponse) {
-            console.log("eeee: ", fullResponse);
-            socket.emit('chunk', fullResponse);
-            socket.emit('done', fullResponse);
-            return fullResponse;
-        } else {
-            socket.emit('error', 'No provider returned a valid response');
-        }
-        socket.emit('done');
     }
 }
 

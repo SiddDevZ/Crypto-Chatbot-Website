@@ -1,23 +1,27 @@
 const models = {
     "AI Web3 Chatbot": {
+      index: 0,
       display: "Web3 Chatbot",
       value: "ai-web3-chatbot",
-      description: "State-of-the-art AI model that suggests cryptocurrencies.",
+      description: "Our state of the art AI model which can suggest cryptos",
       icon: "/bulb.svg"
     },
     "Ask Crypto People": {
+      index: 1,
       display: "Ask Crypto People",
       value: "ask-crypto-people",
       description: "Get insights from AI-simulated crypto experts.",
       icon: "/user.svg"
     },
-    "AI Smart Contracts": {
-      display: "Smart Contracts",
-      value: "ai-smart-contracts",
-      description: "Analyze and generate smart contracts with AI.",
-      icon: "/search.svg"
+    "AI News": {
+      index: 2,
+      display: "AI News",
+      value: "ai-news",
+      description: "Get the latest AI-curated crypto and blockchain news.",
+      icon: "/news.svg"
     },
     "AI Trading Assistant": {
+      index: 3,
       display: "Trading Assistant",
       value: "ai-trading-assistant",
       description: "Provides AI-powered trading suggestions and analysis.",
