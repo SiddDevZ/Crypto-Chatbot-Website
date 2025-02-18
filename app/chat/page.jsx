@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { RiMenuLine, RiCloseLine } from "react-icons/ri";
 import CryptoCoins from "@/components/CryptoCoins/CryptoCoins";
 import { aiQuickAccess, coinss, aiCoinss } from "./data.js";
@@ -121,7 +121,18 @@ const Home = () => {
   const [messages, setMessages] = useState([]);
   const [doneResponding, setDoneResponding] = useState(false);
   const [metaData, setMetaData] = useState([]);
-  const responseBuffer = useRef("");
+  const bufferRef = useRef('');
+  const [, forceUpdate] = useState();
+
+  const updateGeneratingMessage = useCallback((newText) => {
+    setGeneratingMessage((prev) => ({
+      ...prev,
+      botResponse: {
+        ...prev.botResponse,
+        text: newText,
+      },
+    }));
+  }, []);
   const [coins, setCoins] = useState(coinss);
   const [aiCoins, setAiCoins] = useState(aiCoinss);
   const chatContainerRef = useRef(null);
@@ -173,8 +184,8 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    // const newSocket = io("http://localhost:3001");
-    const newSocket = io("https://crypto-chatbot-website.onrender.com");
+    const newSocket = io("http://localhost:3001");
+    // const newSocket = io("https://crypto-chatbot-website.onrender.com");
 
     newSocket.on("error", (errorMsg) => {
       console.error("Server error:", errorMsg);
@@ -258,6 +269,7 @@ const Home = () => {
     // startAutoScroll();
     setStartedGenerating(true);
     setIsGenerating(true);
+    setStartedResponding(false);
     setDoneResponding(false);
     console.log("Sending message:", message);
     console.log("Generating response... ", provider);
@@ -293,32 +305,41 @@ const Home = () => {
       const fullPrompt = `${specializedPrompt} "${message}"`;
       socket.emit("send", { prompt: fullPrompt, provider: provider });
 
+      let accumulatedChunks = '';
+      let lastUpdateTime = Date.now();
+
       socket.on("chunk", (chunk) => {
         setStartedResponding(true);
-        setGeneratingMessage((prev) => ({
-          ...prev,
-          botResponse: {
-            text: prev.botResponse.text + chunk,
-          },
-        }));
+        accumulatedChunks += chunk;
+
+        // Update every 100ms to balance between responsiveness and performance
+        if (Date.now() - lastUpdateTime > 10) {
+          updateGeneratingMessage(accumulatedChunks);
+          lastUpdateTime = Date.now();
+        }
       });
 
       socket.on("done", () => {
-        if (generatingMessage.botResponse.text.trim() === "") {
+        // Final update with all accumulated chunks
+        updateGeneratingMessage(accumulatedChunks);
+
+        if (accumulatedChunks.trim() === "") {
           setGeneratingMessage((prev) => ({
             ...prev,
             botResponse: { 
-              text: prev.botResponse.text.trim() === "" 
-                ? "Error generating your message, either API issue or you have been rate limited." 
-                : prev.botResponse.text
+              text: "Error generating your message, either API issue or you have been rate limited." 
             }
           }));
         }
-        // stopAutoScroll();
         setIsGenerating(false);
         setDoneResponding(true);
-        // setStartedResponding(false);
+        accumulatedChunks = '';
       });
+
+      return () => {
+        socket.off("chunk");
+        socket.off("done");
+      };
     }
   };
 

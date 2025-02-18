@@ -40,6 +40,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
       {/* Trigger Button */}
       <button
         onClick={() => onToggle(!isOpen)}
+        type="button"
         className="flex items-center gap-2 bg-[#212121] px-3 py-2 rounded-lg border border-[#383838] hover:border-[#414141] transition-colors"
       >
         {selectedModelData.icon && (
@@ -62,6 +63,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
           {modelEntries.map((model, index) => (
             <button
               key={model.value}
+              type="button"
               onClick={() => handleModelSelect(index)}
               className="flex items-center justify-between w-full px-3 py-2.5 hover:bg-[#2a2a2a] text-sm transition-colors"
             >
@@ -84,6 +86,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
           <div className="p-2">
             <div className="flex justify-end mb-1">
               <button 
+                type="button"
                 onClick={startCloseAnimation}
                 className="p-1 text-[#8e8e8e] hover:text-[#e2e2e2] transition-colors"
               >
@@ -94,6 +97,7 @@ const ModelDropdown = ({ selectedModel, setSelectedModel, models, isOpen, onTogg
               {modelEntries.map((model, index) => (
                 <button
                   key={model.value}
+                  type="button"
                   onClick={() => handleModelSelect(index)}
                   className="flex items-center justify-between w-full px-3 py-2.5 hover:bg-[#2a2a2a] rounded-lg transition-colors"
                 >
