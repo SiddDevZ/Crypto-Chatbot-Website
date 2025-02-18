@@ -124,6 +124,9 @@ const Home = () => {
   const responseBuffer = useRef("");
   const [coins, setCoins] = useState(coinss);
   const [aiCoins, setAiCoins] = useState(aiCoinss);
+  const chatContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  
   const [generatingMessage, setGeneratingMessage] = useState({
     id: 69,
     userMessage: {
@@ -135,6 +138,25 @@ const Home = () => {
     },
   });
   const [socket, setSocket] = useState(null);
+  const autoScroll = useRef(true);
+
+  useEffect(() => {
+    if (autoScroll.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, generatingMessage]);
+
+  useEffect(() => {
+    const container = document.querySelector('.overflow-y-auto');
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      autoScroll.current = scrollHeight - (scrollTop + clientHeight) < 100;
+    };
+    
+    container?.addEventListener('scroll', handleScroll);
+    return () => container?.removeEventListener('scroll', handleScroll);
+  }, []);
+  
 
   useEffect(() => {
     const handleResize = () => {
@@ -233,6 +255,7 @@ const Home = () => {
 
   const handleSendMessage = async (message, provider) => {
     // responseBuffer.current = "";
+    // startAutoScroll();
     setStartedGenerating(true);
     setIsGenerating(true);
     setDoneResponding(false);
@@ -291,6 +314,7 @@ const Home = () => {
             }
           }));
         }
+        // stopAutoScroll();
         setIsGenerating(false);
         setDoneResponding(true);
         // setStartedResponding(false);
@@ -437,10 +461,11 @@ const Home = () => {
           /* Add your chat interface here */
           <div className="flex flex-col h-screen relative">
             <div className="flex-1 overflow-y-auto pb-24">
-              <div className="w-[94%] max-w-3xl mx-auto mt-[15vh] p-4">
+              <div ref={chatContainerRef} className="w-[94%] max-w-3xl mx-auto mt-[15vh] p-4">
                 {messages.map((chat, index) => (
                   <div
                     key={index}
+                    // ref={chatContainerRef}
                     className={`chat-entry mb-4 pb-8 ${
                       index !== messages.length - 1
                         ? "border-[#333333] border-b"
@@ -632,6 +657,7 @@ const Home = () => {
                     )}
                   </div>
                 )}
+                <div ref={messagesEndRef}></div>
               </div>
             </div>
             <div className="absolute bottom-0 left-0 right-0 pb-4 px-3 pt-0.5 bg-[#131414]">
