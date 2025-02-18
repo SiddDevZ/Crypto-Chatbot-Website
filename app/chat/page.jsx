@@ -281,8 +281,15 @@ const Home = () => {
       });
 
       socket.on("done", () => {
-        if (generatingMessage.botResponse.text == ""){
-          setGeneratingMessage((prev) => ({...prev, botResponse: { text: "Error generating your message, either api issue or you have been rate limited." } }));
+        if (generatingMessage.botResponse.text.trim() === "") {
+          setGeneratingMessage((prev) => ({
+            ...prev,
+            botResponse: { 
+              text: prev.botResponse.text.trim() === "" 
+                ? "Error generating your message, either API issue or you have been rate limited." 
+                : prev.botResponse.text
+            }
+          }));
         }
         setIsGenerating(false);
         setDoneResponding(true);
