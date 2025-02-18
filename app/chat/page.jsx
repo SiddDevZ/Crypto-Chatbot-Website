@@ -151,7 +151,8 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3001");
+    // const newSocket = io("http://localhost:3001");
+    const newSocket = io("https://crypto-chatbot-website.onrender.com");
 
     newSocket.on("error", (errorMsg) => {
       console.error("Server error:", errorMsg);
