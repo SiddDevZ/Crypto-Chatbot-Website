@@ -9,7 +9,7 @@ config();
 
 // Rate limiting mechanism
 const RATE_LIMIT_WINDOW = 60000; // 1 minute in milliseconds
-const MAX_REQUESTS_PER_WINDOW = 5; // Maximum 5 requests per minute
+const MAX_REQUESTS_PER_WINDOW = 25;
 
 const rateLimitMap = new Map();
 
